@@ -1,8 +1,18 @@
 
-table, tr, td{
-    border: 1px solid;
+table{
+    margin: 20px;
     border-collapse: collapse;
 }
-table tr th{
-    font-weight: bold;
+td{
+    
+    border: 1px solid;
+    padding: 10px;
+    height: 1em;
+    text-align: center;
+}
+.prisutan{
+    background-color: green;
+}
+.odsutan{
+    background-color: red;
 }
