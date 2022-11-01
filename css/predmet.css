@@ -12,3 +12,19 @@ menu li ul{
     list-style-type: none;
     margin: 0;
 }
+.gridw{
+    background-color: brown;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 200px));
+    width: 100%;
+gap:10px;
+}
+.gridw>div{
+    width: 200px;
+}
+.ukinut{
+    background-color: grey;
+}
+.izborni{
+    background-color: powderblue;
+}
