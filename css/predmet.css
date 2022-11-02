@@ -1,12 +1,17 @@
 
+ :root {
+    --menu:#aaa9a9;
+    --bg:  #cccccc;
+    --slova: #000;
+  }
  body{
-    background-color: #fffbed;
+    background-color: var(--bg);
     margin:0px;
 }
  menu{
     border-bottom-left-radius: 4%;
     border-bottom-right-radius: 4%;
-    background-color: #d8d3bf;
+    background-color:var(--menu);
     list-style-type: none;
     display: flex;
     padding-bottom: 15px;
@@ -25,11 +30,16 @@ menu li ul{
     margin: 0;
 }
 h1{
-    color: #0fa378;
+    text-align: center;
+    color: var(--slova);
+}
+h2{
+    text-align: center;
+    color: var(--slova);
 }
 a{
-    
-    color: #0fa378;
+    font-size:x-large;
+    color: var(--slova);
     box-sizing: border-box;
     padding: 5px;
     border-radius: 5px;
@@ -37,21 +47,39 @@ a{
     font-weight: bold;
 }
 a:hover{
-    background-color: #66c8b1;
+    background-color: #e9e5d9;
 }
 .gridw{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 200px));
     width: 100%;
-gap:10px;
-justify-content: space-between;
+    justify-content:space-evenly;
+    gap:13px;
 }
 .gridw>div{
     width: 200px;
+    padding: 10px;
+    box-sizing: border-box;
 }
 .ukinut{
     background-color: grey;
 }
 .izborni{
     background-color: powderblue;
+}
+.redovni{
+    background-color: white;
+}
+.izborni, .ukinut, .redovni{
+    padding: 10px;
+    border-radius: 5%;
+}
+.izborni, .ukinut, .redovni h2,h1,h3{
+margin: 0;
+}
+h3{
+    text-align: center;
+}
+#rie,#ee,#ri,#tk{
+    margin-top: 20px;
 }
