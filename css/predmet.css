@@ -1,9 +1,21 @@
-menu{
+
+ body{
+    background-color: #fffbed;
+    margin:0px;
+}
+ menu{
+    border-bottom-left-radius: 4%;
+    border-bottom-right-radius: 4%;
+    background-color: #d8d3bf;
     list-style-type: none;
     display: flex;
-    padding: 0;
+    padding-bottom: 15px;
+    margin: 0;
     }
 menu li{
+    
+    padding-top: 15px;
+    box-sizing: border-box;
     margin: auto;
     margin-top: 0;
 }
@@ -12,12 +24,27 @@ menu li ul{
     list-style-type: none;
     margin: 0;
 }
+h1{
+    color: #0fa378;
+}
+a{
+    
+    color: #0fa378;
+    box-sizing: border-box;
+    padding: 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+a:hover{
+    background-color: #66c8b1;
+}
 .gridw{
-    background-color: brown;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 200px));
     width: 100%;
 gap:10px;
+justify-content: space-between;
 }
 .gridw>div{
     width: 200px;
