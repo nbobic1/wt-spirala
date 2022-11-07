@@ -20,18 +20,19 @@ header{
     border-bottom-right-radius: 4%;
     background-color:var(--menu);
     list-style-type: none;
-    display: flex;
-    padding-bottom: 15px;
+   display: flex;
+   padding-bottom: 15px;
     margin: 0;
     }
 menu li{
-    
+    width: 100%;
     padding-top: 15px;
     box-sizing: border-box;
     margin: auto;
     margin-top: 0;
 }
 menu li ul{
+    width: 100%;
     box-sizing: border-box;
     list-style-type: none;
     margin: 0;
@@ -92,4 +93,21 @@ h3{
 }
 #rie,#ee,#ri,#tk{
     margin-top: 20px;
+}
+@media screen and (max-width:600px){
+    
+ menu{
+    text-align: center;
+    padding-inline-start: 0;
+    position: fixed;
+    width:100%;
+    top:0;
+    display:list-item;
+    border-bottom-left-radius: 4%;
+    border-bottom-right-radius: 4%;
+    background-color:var(--menu);
+    list-style-type: none;
+    padding-bottom: 15px;
+    margin: 0;
+    }
 }
