@@ -5,13 +5,14 @@ table{
 }
 td{
     
-    border: 1px solid;
+    border: 2px solid black;
     padding: 10px;
+    vertical-align: top;
     height: 1em;
     }
 .prisutan{
-    background-color: green;
+    background-color: #94c47c;
 }
 .odsutan{
-    background-color: red;
+    background-color: #e36464;
 }
