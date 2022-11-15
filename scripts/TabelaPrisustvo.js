@@ -3,8 +3,8 @@ let TabelaPrisustvo = function (divRef, podaci) {
     //
     if(div==null||podaci==null)
     return {sljedecaSedmica:null,prethodnaSedmica:null};
-    var br_prisustva=podaci.prisustvo.length;
-    if(br_prisustva<0||br_prisustva!=podaci.brojPredavanjaSedmicno||br_prisustva!=podaci.brojVjezbiSedmicno)
+    var br_prisustva=podaci.prisustva.length;
+    if(br_prisustva<0||br_prisustva>podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)
     {
         divRef.innerHTML="Podaci o prisustvu nisu validni!";
         return {sljedecaSedmica:null,prethodnaSedmica:null};
@@ -12,23 +12,23 @@ let TabelaPrisustvo = function (divRef, podaci) {
     //dva studenta sa istim indeksom
     for(var i=0;i<podaci.studenti.length;i++)
     {
-        if(podaci.studenti.filter(e=>e.index==podaci.studenti[i].index).length!=0)
+        if(podaci.studenti.filter(e=>e.index==podaci.studenti[i].index).length!=1)
         {
             divRef.innerHTML="Podaci o prisustvu nisu validni!";
             return {sljedecaSedmica:null,prethodnaSedmica:null};                
         }
     } 
     //index je u prisustvu ali nije u nizu sa studentima
-    for(var i=0;i<podaci.prisustvo.length;i++)
+    for(var i=0;i<podaci.prisustva.length;i++)
     {
-        if(podaci.studenti.filter(e=>e.index==podaci.prisustvo[i].index).length==0)
+        if(podaci.studenti.filter(e=>e.index==podaci.prisustva[i].index).length==0)
         {
             divRef.innerHTML="Podaci o prisustvu nisu validni!";
             return {sljedecaSedmica:null,prethodnaSedmica:null};
         }
     }   
     //preskocena sedmica
-    var k=podaci.prisustvo.map(e=>e.sedmica);
+    var k=podaci.prisustva.map(e=>e.sedmica);
     if(k.length>1)
     for(var i=1;i<k.length;i++)
     {
@@ -39,33 +39,83 @@ let TabelaPrisustvo = function (divRef, podaci) {
         }
     }
     //isti student ima 2 ili više prisustva za istu sedmicu
-    for(var i=0;i<podaci.prisustvo.length;i++)
+    for(var i=0;i<podaci.prisustva.length;i++)
     {
-        if(podaci.prisustvo.filter(e=>e.index==podaci.prisustvo[i].index&&e.sedmica==podaci.prisustvo[i].sedmica).length!=1)
+        if(podaci.prisustva.filter(e=>e.index==podaci.prisustva[i].index&&e.sedmica==podaci.prisustva[i].sedmica).length!=1)
         {
             divRef.innerHTML="Podaci o prisustvu nisu validni!";
             return {sljedecaSedmica:null,prethodnaSedmica:null};    
         }
     }
     //inicijalizacija modula
-    divRef.innerHTML="<table><tr><td><b>Ime i prezime</b></td><td><b>Index</b></td>";
-    for(var i=1;i<Math.max(...k);i++)
+    function pravljenjeTabele()
     {
-        divRef.innerHTML+="<td><b>"+rimski(i)+"</b></td>"
-    }
-    divRef.innerHTML+="</tr>"
-    for(var j=0;j<podaci.studenti.length;j++)
-    {
-        divRef.innerHTML+="<tr><td rowspan=\"2\"><b>"+podaci.studenti[j].ime+"</b></td><td rowspan=\"2\"><b>"+podaci.studenti[j].index+"</b></td>"     
+
+        var html="<table><tr><td><b>Ime i prezime</b></td><td><b>Index</b></td>";
         for(var i=1;i<Math.max(...k);i++)
         {
-
+           html+="<td><b>"+rimski(i)+"</b></td>";
         }
-        divRef.innerHTML+="</tr>"
+        html+="<td colspan=\""+(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)+"\"><b>"+rimski(i)+"</b></td>";
+        if(Math.max(...k)==13)
+        html+="<td><b>XIV  </b></td>";
+        else if(Math.max(...k)!=14)
+        html+="<td><b>"+rimski(Math.max(...k)+1)+"-XIV</b></td>";
+        html+="</tr>"
+        for(var j=0;j<podaci.studenti.length;j++)
+        {
+            html+="<tr><td rowspan=\"2\">"+podaci.studenti[j].ime+"</td><td rowspan=\"2\">"+podaci.studenti[j].index+"</td>";
+            var pris=podaci.prisustva.filter(e=>e.index==podaci.studenti[j].index).sort((a,b)=>a.sedmica-b.sedmica);
+            console.log(pris);
+            //dodajem prisustvo za nedetaljne sedmice
+            for(var i=0;i<pris.length-1;i++)
+            {
+                console.log(pris[i].predavanja+pris[i].vjezbe);
+                console.log(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno);
+                html+="<td rowspan=\"2\">"+Math.round(100*(pris[i].predavanja+pris[i].vjezbe)/(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno))+"%</td>";
+            }
+    //detaljno pirsustvo
+            for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+            {
+                html+="<td>p<br>"+zu;
+                html+="</td>";
+            }
+            for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+            {
+                html+="<td>v<br>"+zu;
+                html+="</td>";
+            }
+            if(Math.max(...k)!=14)
+            html+="<td></td>"
+            html+="</tr>"
+    
+            html+="<tr>";        
+            for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+            {
+                    if(zu<=pris[pris.length-1].predavanja)
+                html+="<td class=\"prisutan\"> </td>";
+                else
+                html+="<td class=\"odsutan\"> </td>";
+            }
+            for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+            {
+                    if(zu<=pris[pris.length-1].vjezbe)
+                html+="<td class=\"prisutan\"> </td>";
+                else
+                html+="<td class=\"odsutan\"> </td>";
+            }
+            if(Math.max(...k)!=14)
+            html+="<td></td>"
+            html+="</tr>"
+        }
+        html+="</table>"  
+        html+="<button onclick=\"sljedecaSedmica()\">Click me</button><button onclick=\"prethodnaSedmica()\">Click me</button>";
+        console.log(html);
+        divRef.innerHTML=html;
+     
     }
-    divRef.innerHTML+="</table>"  
-    console.log(div.innerHTML);
- function rimski(a)
+    pravljenjeTabele(); 
+    function rimski(a)
  {
     switch(a)
     {
