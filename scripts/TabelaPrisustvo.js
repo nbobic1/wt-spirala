@@ -1,4 +1,5 @@
 let TabelaPrisustvo = function (divRef, podaci) {
+
     //privatni atributi modula
     //
     if(div==null||podaci==null)
@@ -27,8 +28,11 @@ let TabelaPrisustvo = function (divRef, podaci) {
             return {sljedecaSedmica:null,prethodnaSedmica:null};
         }
     }   
-    //preskocena sedmica
+    
     var k=podaci.prisustva.map(e=>e.sedmica);
+    var q=Math.max(...k);
+    console.log("q0======="+q)
+    //preskocena sedmica
     if(k.length>1)
     for(var i=1;i<k.length;i++)
     {
@@ -47,16 +51,19 @@ let TabelaPrisustvo = function (divRef, podaci) {
             return {sljedecaSedmica:null,prethodnaSedmica:null};    
         }
     }
+    
+    
     //inicijalizacija modula
-    function pravljenjeTabele()
+    function pravljenjeTabele1(q)
     {
-
         var html="<table><tr><td><b>Ime i prezime</b></td><td><b>Index</b></td>";
-        for(var i=1;i<Math.max(...k);i++)
+        for(var i=1;i<Math.max(...k)+1;i++)
         {
-           html+="<td><b>"+rimski(i)+"</b></td>";
+            if(q==i)
+           html+="<td colspan=\""+(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)+"\"><b>"+rimski(i)+"</b></td>";
+            else
+            html+="<td><b>"+rimski(i)+"</b></td>"; 
         }
-        html+="<td colspan=\""+(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)+"\"><b>"+rimski(i)+"</b></td>";
         if(Math.max(...k)==13)
         html+="<td><b>XIV  </b></td>";
         else if(Math.max(...k)!=14)
@@ -66,55 +73,55 @@ let TabelaPrisustvo = function (divRef, podaci) {
         {
             html+="<tr><td rowspan=\"2\">"+podaci.studenti[j].ime+"</td><td rowspan=\"2\">"+podaci.studenti[j].index+"</td>";
             var pris=podaci.prisustva.filter(e=>e.index==podaci.studenti[j].index).sort((a,b)=>a.sedmica-b.sedmica);
-            console.log(pris);
             //dodajem prisustvo za nedetaljne sedmice
-            for(var i=0;i<pris.length-1;i++)
+            for(var i=0;i<pris.length;i++)
             {
-                console.log(pris[i].predavanja+pris[i].vjezbe);
-                console.log(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno);
+                if(q!=i+1)
                 html+="<td rowspan=\"2\">"+Math.round(100*(pris[i].predavanja+pris[i].vjezbe)/(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno))+"%</td>";
+                else
+                {
+                    for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+                    {
+                        html+="<td>p<br>"+zu;
+                        html+="</td>";
+                    }
+                    for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+                    {
+                        html+="<td>v<br>"+zu;
+                        html+="</td>";
+                    }
+                }
             }
     //detaljno pirsustvo
-            for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
-            {
-                html+="<td>p<br>"+zu;
-                html+="</td>";
-            }
-            for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
-            {
-                html+="<td>v<br>"+zu;
-                html+="</td>";
-            }
+            
             if(Math.max(...k)!=14)
-            html+="<td></td>"
+            html+="<td rowspan=\"2\"></td>"
             html+="</tr>"
     
             html+="<tr>";        
             for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
             {
-                    if(zu<=pris[pris.length-1].predavanja)
+                    if(zu<=pris[q-1].predavanja)
                 html+="<td class=\"prisutan\"> </td>";
                 else
                 html+="<td class=\"odsutan\"> </td>";
             }
             for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
             {
-                    if(zu<=pris[pris.length-1].vjezbe)
+                    if(zu<=pris[q-1].vjezbe)
                 html+="<td class=\"prisutan\"> </td>";
                 else
                 html+="<td class=\"odsutan\"> </td>";
             }
-            if(Math.max(...k)!=14)
-            html+="<td></td>"
             html+="</tr>"
         }
         html+="</table>"  
-        html+="<button onclick=\"sljedecaSedmica()\">Click me</button><button onclick=\"prethodnaSedmica()\">Click me</button>";
+        html+="<button onclick=\"prisustvo.prethodnaSedmica()\"><i class=\"fa-solid fa-arrow-right\"></i></button><button onclick=\"prisustvo.sljedecaSedmica()\"><i class=\"fa-solid fa-arrow-left\"></i></button>";
         console.log(html);
         divRef.innerHTML=html;
      
     }
-    pravljenjeTabele(); 
+    pravljenjeTabele1(q); 
     function rimski(a)
  {
     switch(a)
@@ -165,11 +172,17 @@ let TabelaPrisustvo = function (divRef, podaci) {
  }
     //implementacija metoda
     let sljedecaSedmica = function () {
-
+        if(q==Math.max(...k))
+        return;
+        q++;
+        pravljenjeTabele1(q);
     }
 
     let prethodnaSedmica = function () {
-
+        if(q==1)
+        return;
+        q--;
+        pravljenjeTabele1(q);
     }
 
 
