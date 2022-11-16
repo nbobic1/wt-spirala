@@ -5,12 +5,15 @@ let TabelaPrisustvo = function (divRef, podaci) {
     if(div==null||podaci==null)
     return {sljedecaSedmica:null,prethodnaSedmica:null};
     var br_prisustva=podaci.prisustva.length;
-    if(br_prisustva<0||br_prisustva>podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)
+  
+    //broj pirsustva manje od nula i proj predavanja veci od onog po sedmici
+    if(podaci.prisustva.filter(e=>e.predavanja<0||e.vjezbe<0||e.predavanja>podaci.brojPredavanjaSedmicno||e.vjezbe>podaci.brojVjezbiSedmicno).length!=0)
     {
         divRef.innerHTML="Podaci o prisustvu nisu validni!";
         return {sljedecaSedmica:null,prethodnaSedmica:null};
     }
     //dva studenta sa istim indeksom
+    
     for(var i=0;i<podaci.studenti.length;i++)
     {
         if(podaci.studenti.filter(e=>e.index==podaci.studenti[i].index).length!=1)
@@ -52,7 +55,8 @@ let TabelaPrisustvo = function (divRef, podaci) {
         }
     }
     
-    
+    let sljedecaSedmica;
+    let prethodnaSedmica; 
     //inicijalizacija modula
     function pravljenjeTabele1(q)
     {
@@ -116,12 +120,27 @@ let TabelaPrisustvo = function (divRef, podaci) {
             html+="</tr>"
         }
         html+="</table>"  
-        html+="<button onclick=\"prisustvo.prethodnaSedmica()\"><i class=\"fa-solid fa-arrow-right\"></i></button><button onclick=\"prisustvo.sljedecaSedmica()\"><i class=\"fa-solid fa-arrow-left\"></i></button>";
         console.log(html);
         divRef.innerHTML=html;
+        var btn=document.createElement("button");
+        btn.innerHTML="<i class=\"fa-solid fa-arrow-left\"></i>";
+        btn.onclick=prethodnaSedmica;
+        divRef.appendChild(btn);
+        var btn1=document.createElement("button");
+        btn1.innerHTML="<i class=\"fa-solid fa-arrow-right\"></i>";
+        btn1.onclick=sljedecaSedmica;
+        divRef.appendChild(btn1);
+
      
     }
-    pravljenjeTabele1(q); 
+    likk=document.createElement("link");
+         likk.rel="stylesheet";
+         likk.integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==";
+         likk.crossOrigin="anonymous";
+         likk.referrerpolicy="no-referrer";
+        likk.href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css";
+        document.head.appendChild(likk);
+        pravljenjeTabele1(q); 
     function rimski(a)
  {
     switch(a)
@@ -171,14 +190,14 @@ let TabelaPrisustvo = function (divRef, podaci) {
     }
  }
     //implementacija metoda
-    let sljedecaSedmica = function () {
+     sljedecaSedmica = function () {
         if(q==Math.max(...k))
         return;
         q++;
         pravljenjeTabele1(q);
     }
 
-    let prethodnaSedmica = function () {
+    prethodnaSedmica = function () {
         if(q==1)
         return;
         q--;
