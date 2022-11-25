@@ -86,7 +86,16 @@ let TabelaPrisustvo = function (divRef, podaci) {
                     html+="<td rowspan=\"2\"> </td>";  
                     else
                     {
-                        html+="<td rowspan=\"2\" colspan=\""+(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)+"\"></td>";
+                        for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+                        {
+                            html+="<td>p<br>"+zu;
+                            html+="</td>";
+                        }
+                        for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+                        {
+                            html+="<td>v<br>"+zu;
+                            html+="</td>";
+                        }
                     }
                 }
 
@@ -133,6 +142,19 @@ let TabelaPrisustvo = function (divRef, podaci) {
                     html+="<td class=\"odsutan\"> </td>";
                 }
             }  
+            else
+            {
+                for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+                {
+                    
+                    html+="<td > </td>";
+                }
+                for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+                {
+                       
+                    html+="<td > </td>";
+                }
+            }
           
             html+="</tr>";
         }
