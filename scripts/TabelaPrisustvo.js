@@ -34,15 +34,14 @@ let TabelaPrisustvo = function (divRef, podaci) {
     
     var k=podaci.prisustva.map(e=>e.sedmica);
     var q=Math.max(...k);
-    console.log("q0======="+q)
     //preskocena sedmica
-    if(k.length>1)
-    for(var i=1;i<k.length;i++)
+  
+    for(var i=Math.min(...k)+1;i<Math.max(...k)-1;i++)
     {
-        if(k[i]-1!=k[i-1])
+        if(k.filter(p=>p==i).length==0)
         {
             divRef.innerHTML="Podaci o prisustvu nisu validni!";
-            return {sljedecaSedmica:null,prethodnaSedmica:null};                
+            return {sljedecaSedmica:null,prethodnaSedmica:null};    
         }
     }
     //isti student ima 2 ili više prisustva za istu sedmicu
@@ -72,16 +71,30 @@ let TabelaPrisustvo = function (divRef, podaci) {
         html+="<td><b>XIV  </b></td>";
         else if(Math.max(...k)!=14)
         html+="<td><b>"+rimski(Math.max(...k)+1)+"-XIV</b></td>";
-        html+="</tr>"
+        html+="</tr>";
         for(var j=0;j<podaci.studenti.length;j++)
         {
             html+="<tr><td rowspan=\"2\">"+podaci.studenti[j].ime+"</td><td rowspan=\"2\">"+podaci.studenti[j].index+"</td>";
             var pris=podaci.prisustva.filter(e=>e.index==podaci.studenti[j].index).sort((a,b)=>a.sedmica-b.sedmica);
             //dodajem prisustvo za nedetaljne sedmice
-            for(var i=0;i<pris.length;i++)
+            for(var i=0;i<Math.max(...pris.map(x=>x.sedmica));i++)
             {
-                if(q!=i+1)
-                html+="<td rowspan=\"2\">"+Math.round(100*(pris[i].predavanja+pris[i].vjezbe)/(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno))+"%</td>";
+                
+                if(pris.filter(x=>x.sedmica==i+1).length==0)
+                {
+                    if(q!=i+1)
+                    html+="<td rowspan=\"2\"> </td>";  
+                    else
+                    {
+                        html+="<td rowspan=\"2\" colspan=\""+(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno)+"\"></td>";
+                    }
+                }
+
+                else if(q!=i+1)
+                {
+                        html+="<td rowspan=\"2\">"+Math.round(100*(pris.filter(x=>x.sedmica==i+1)[0].predavanja+pris.filter(x=>x.sedmica==i+1)[0].vjezbe)/(podaci.brojPredavanjaSedmicno+podaci.brojVjezbiSedmicno))+"%</td>";
+            
+                 }
                 else
                 {
                     for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
@@ -99,27 +112,31 @@ let TabelaPrisustvo = function (divRef, podaci) {
     //detaljno pirsustvo
             
             if(Math.max(...k)!=14)
-            html+="<td rowspan=\"2\"></td>"
-            html+="</tr>"
+            html+="<td rowspan=\"2\"></td>";
+            html+="</tr>";
     
-            html+="<tr>";        
-            for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
-            {
-                    if(zu<=pris[q-1].predavanja)
-                html+="<td class=\"prisutan\"> </td>";
-                else
-                html+="<td class=\"odsutan\"> </td>";
-            }
-            for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
-            {
-                    if(zu<=pris[q-1].vjezbe)
-                html+="<td class=\"prisutan\"> </td>";
-                else
-                html+="<td class=\"odsutan\"> </td>";
-            }
-            html+="</tr>"
+            html+="<tr>";      
+            if(pris.filter(x=>x.sedmica==q).length!=0)
+            {    
+                for(var zu=1;zu<=podaci.brojPredavanjaSedmicno;zu++)
+                {
+                        if(zu<=pris.filter(x=>x.sedmica==q)[0].predavanja)
+                    html+="<td class=\"prisutan\"> </td>";
+                    else
+                    html+="<td class=\"odsutan\"> </td>";
+                }
+                for(var zu=1;zu<=podaci.brojVjezbiSedmicno;zu++)
+                {
+                        if(zu<=pris.filter(x=>x.sedmica==q)[0].vjezbe)
+                    html+="<td class=\"prisutan\"> </td>";
+                    else
+                    html+="<td class=\"odsutan\"> </td>";
+                }
+            }  
+          
+            html+="</tr>";
         }
-        html+="</table>"  
+        html+="</table>";
         console.log(html);
         divRef.innerHTML=html;
         var btn=document.createElement("button");
