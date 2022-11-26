@@ -1,5 +1,5 @@
 let TabelaPrisustvo = function (divRef, podaci) {
-
+    	divRef.replaceChildren();
     //privatni atributi modula
     //
     if(div==null||podaci==null)
