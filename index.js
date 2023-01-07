@@ -60,7 +60,7 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
     var tzu1=req.params.index;
     console.log(req.body['sedmica']);
       if(req.session.username!=null)
-      fs.readFile(__dirname+"/data/prisustva.json", (err, data) => {
+      fs.readFile(__dirname+"/public/data/prisustva.json", (err, data) => {
         if (err==null) 
         {
             let unpa= JSON.parse(data);
@@ -80,7 +80,7 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
                             console.log("writeam file")
                             unpa[i].prisustva[j].predavanja=req.body['predavanja'];
                             unpa[i].prisustva[j].vjezbe=req.body['vjezbe'];
-                            fs.writeFile(__dirname+"/data/prisustva.json",JSON.stringify(unpa),err => {
+                            fs.writeFile(__dirname+"/public/data/prisustva.json",JSON.stringify(unpa),err => {
                                 if (err) {
                                         console.log("greak")
                                   console.error(err);
@@ -94,7 +94,7 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
                     if(zgh==0)
                     {
                         unpa[i].prisustva.push({sedmica:req.body['sedmica'],predavanja:req.body['predavanja'],vjezbe:req.body['vjezbe'],index:tzu1});
-                        fs.writeFile(__dirname+"/data/prisustva.json",JSON.stringify(unpa),err => {
+                        fs.writeFile(__dirname+"/public/data/prisustva.json",JSON.stringify(unpa),err => {
                             if (err) {
                                     console.log("greak")
                               console.error(err);
@@ -120,7 +120,7 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
     console.log("NAZIV");
     var tzu=req.params.NAZIV;
       if(req.session.username!=null)
-      fs.readFile(__dirname+"/data/prisustva.json", (err, data) => {
+      fs.readFile(__dirname+"/public/data/prisustva.json", (err, data) => {
         if (err==null) 
         {
             let unpa= JSON.parse(data);
@@ -157,7 +157,7 @@ function cbCrypt(z,z1,a,res,req,k,p)
 }   
 app.post('/login',function(req,res){
    let tijelo = req.body;
-   fs.readFile(__dirname+"/data/nastavnici.json", (err, data) => {
+   fs.readFile(__dirname+"/public/data/nastavnici.json", (err, data) => {
     if (err==null) 
     {
         let unpa= JSON.parse(data);
