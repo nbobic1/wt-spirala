@@ -16,6 +16,10 @@ header{
     position: fixed;
     width: 100%;
 }
+.nok{
+    margin-top: 400px;
+    background-color: white;
+}
  .menu{
     position: fixed;
     flex-direction: row;
