@@ -14,7 +14,7 @@ app.use(session({
  }));
  
 app.set("view engine", "pug");
-app.set("views",    path.join(__dirname, "views"));
+app.set("views",    path.join(__dirname, "/public/views"));
 app.use(express.static(__dirname+'/public/html'));
 app.use(express.static(__dirname+'/public/css'));
 app.use(express.static(__dirname+'/public/scripts'));
