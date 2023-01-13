@@ -6,13 +6,94 @@ const session = require("express-session");
 const app = express();
 const path=require('path')
 const pug = require('pug');
+//const Sequelize = require('sequelize');
 //sesija
 app.use(session({
     secret: 'neka tajna sifra',
     resave: true,
     saveUninitialized: true
  }));
+ //baza
+ const sequelize = require('./baza/baza.js');
+ const Nastavnici = require('./baza/nastavnici.js')(sequelize);
+const Nastavnik= require('./baza/nastavnik.js')(sequelize);
+const Predmet= require('./baza/predmet.js')(sequelize);
+const Prisustva=require('./baza/prisustva.js')(sequelize)
+const Prisustvo=require('./baza/prisustvo.js')(sequelize)
+const Student=require('./baza/student.js')(sequelize)
+
+Nastavnici.hasMany(Nastavnik, {
+  foreignKey: {
+    allowNull: false
+  }
+});
+
+Nastavnici.hasMany(Predmet, {
+  foreignKey: {
+    allowNull: false
+  }
+});
+Prisustva.hasMany(Student,{ foreignKey: {
+  allowNull: false
+}});
+Prisustva.hasMany(Prisustvo,{ foreignKey: {
+  allowNull: false
+}});
+Nastavnik.sync();
+Predmet.sync();
+Nastavnici.sync();
+Student.sync();
+Prisustvo.sync();
+Prisustva.sync();
+//Nastavnici.create({nastavnicis:{username:"adsljga",password_hash:"dafaf"}, 
+ //Predmet.findOrCreate({where:{id:1},defaults:{naziv:"gori",NastavniciId:1}}).then(function(t){console.log(t)});
+ //Nastavnik.findOrCreate({where:{id:1},defaults:{username:"user",password_hash:"admin",NastavniciId:1}}).then(function(t){console.log(t)});
+
+ var nas=require("./public/data/nastavnici.json")
+ console.log(nas.length)
+ function asinhronoUnos(i,nas) {
+  return new Promise(function (resolve, reject) {
+      Nastavnici.findOrCreate({ where: { id: i + 1 } }).then(function(results){
+        Nastavnik.findOrCreate({ where: { NastavniciId: i+1 }, defaults: { username: nas[i].nastavnik.username, password_hash: nas[i].nastavnik.password_hash, NastavniciId: i+1 } })
+        .then(function(results){
+                  for(var j=0;j<nas[i].predmeti.length;j++)
+          Predmet.findOrCreate({ where: { NastavniciId: i+1, naziv:nas[i].predmeti[j] }, defaults: { naziv: nas[i].predmeti[j], NastavniciId: i+1 } })
+        })}
+      )
+  });
+}
  
+var nizPromisea = [];
+ for(var i=0;i<nas.length;i++)
+ {
+    nizPromisea.push(asinhronoUnos(i,nas)) 
+ }
+ Promise.all(nizPromisea)
+ //prisustva
+ var pri=require("./public/data/prisustva.json")
+ console.log(nas.length)
+ function asinhronoUnos2(i,pri) {
+  return new Promise(function (resolve, reject) {
+      Prisustva.findOrCreate({ where: {predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno }, default:{ predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno} }).then(function(results){
+        for(var p=0;p<pri[i].studenti.length;p++)
+        Student.findOrCreate({ where: { PrisustvaId: i+1,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index }, defaults: {  PrisustvaId: i+1,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index} })
+        .then(function(results){
+                  for(var j=0;j<pri[i].prisustva.length;j++)
+          Prisustvo.findOrCreate({ where: { PrisustvaId: i+1, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja }, defaults: {  PrisustvaId: i+1, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja} })
+        })}
+      )
+  });
+}
+ 
+var nizPromisea2 = [];
+ for(var i=0;i<pri.length;i++)
+ {
+    nizPromisea2.push(asinhronoUnos2(i,pri)) 
+ }
+ Promise.all(nizPromisea2)
+ 
+
+ //kraj baze
 app.set("view engine", "pug");
 app.set("views",    path.join(__dirname, "/public/views"));
 app.use(express.static(__dirname+'/public/html'));
@@ -120,23 +201,62 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
     console.log("NAZIV");
     var tzu=req.params.NAZIV;
       if(req.session.username!=null)
-      fs.readFile(__dirname+"/public/data/prisustva.json", (err, data) => {
-        if (err==null) 
+      Prisustva.findAll({include : [Prisustvo, Student]}).then(function(results){
+        console.log("goriidisfs")
+        console.log(results)
+        var rez=[]
+        for(var i=0;i<results.length;i++)
         {
-            let unpa= JSON.parse(data);
-            let z=0;
-            for(let i=0;i<unpa.length;i++)
+          var k={
+            predmet:"",
+            brojPredavanjaSedmicno:0,
+            brojVjezbiSedmicno:0
+          ,prisustva:[],
+        studenti:[]
+      }
+          k.predmet=results[i].dataValues.predmet;
+          k.brojPredavanjaSedmicno=results[i].dataValues.brojPredavanjaSedmicno;
+          k.brojVjezbiSedmicno=results[i].dataValues.brojVjezbiSedmicno;
+          for(var j=0;j<results[0].dataValues.Students.length;j++)
+          {
+            var z={
+              ime: "",
+                index: 0
+               }
+               z.ime=results[0].dataValues.Students[j].ime;
+               z.index=results[0].dataValues.Students[j].index;
+              k.studenti.push(z)
+          }
+          for(var j=0;j<results[0].dataValues.Prisustvos.length;j++)
+          {
+            var z={
+              sedmica: 0,
+                predavanja: 0,
+                vjezbe: 0,
+                index: 0
+            }
+            z.sedmica=results[0].dataValues.Prisustvos[j].sedmica;
+            z.index=results[0].dataValues.Prisustvos[j].index;
+            z.predavanja=results[0].dataValues.Prisustvos[j].predavanja;
+            z.vjezbe=results[0].dataValues.Prisustvos[j].vjezbe;
+              k.prisustva.push(z)
+          }
+          rez.push(k)
+        }
+        console.log("-------------------------\n")
+        console.log(rez[0].prisustva[0])
+        for(let i=0;i<rez.length;i++)
+        {
+            if(rez[i].predmet==tzu)
             {
-                if(unpa[i].predmet==tzu)
-                {
-                    res.send(unpa[i]);
-                    break;
-                }
+                res.send(rez[i]);
+                break;
             }
         }
-        });
-      else
-      res.json({greska:"Nastavnik nije loginovan"}); 
+      })
+      else 
+      res.json({greska:"Nastavnik nije loginovan"});
+       
       
   });
 ///////////
@@ -157,27 +277,41 @@ function cbCrypt(z,z1,a,res,req,k,p)
 }   
 app.post('/login',function(req,res){
    let tijelo = req.body;
-   fs.readFile(__dirname+"/public/data/nastavnici.json", (err, data) => {
-    if (err==null) 
+   Nastavnici.findAll({include : [Predmet, Nastavnik]}).then(function(results){
+    console.log("goriidisfs")
+    console.log(results[0].dataValues.Predmets[0].naziv)
+    var rez=[]
+    for(var i=0;i<results.length;i++)
     {
-        let unpa= JSON.parse(data);
-        let z=0;
-        for(let i=0;i<unpa.length;i++)
-        {
-            if(unpa[i].nastavnik.username==tijelo['username'])
-            bcrypt.compare(tijelo['password'],unpa[i].nastavnik.password_hash, function(err, rje) {
-                 if(err==null&&rje==true)
-                    {
-                        cbCrypt(z,unpa.length,rje,res,req,tijelo['username'],unpa[i].predmeti);
-                    }
-            });
-            if(z==-1)
-            break;
-        }
+      var k={nastavnik:{
+        username:"",
+        password_hash:""
+      },predmeti:[]}
+      k.nastavnik.username=results[i].dataValues.Nastavniks[0].username;
+      k.nastavnik.password_hash=results[i].dataValues.Nastavniks[0].password_hash;
+      for(var j=0;j<results[0].dataValues.Predmets.length;j++)
+      {
+          k.predmeti.push(results[0].dataValues.Predmets[j].naziv)
+      }
+      rez.push(k)
     }
-    else 
-    res.json({"poruka":"greak u fajlu "+err});
-    });
+    console.log("-------------------------\n")
+    console.log(rez)
+    let z=0;
+    for(let i=0;i<rez.length;i++)
+    {
+        if(rez[i].nastavnik.username==tijelo['username'])
+        bcrypt.compare(tijelo['password'],rez[i].nastavnik.password_hash, function(err, rje) {
+             if(err==null&&rje==true)
+                {
+                    cbCrypt(z,rez.length,rje,res,req,tijelo['username'],rez[i].predmeti);
+                }
+        });
+        if(z==-1)
+        break;
+    }
+  })
+
 });
 app.post('/logout',function(req,res){
     if(req.session.username!=null)
