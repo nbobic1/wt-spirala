@@ -54,10 +54,10 @@ Prisustva.sync();
  function asinhronoUnos(i,nas) {
   return new Promise(function (resolve, reject) {
       Nastavnici.findOrCreate({ where: { id: i + 1 } }).then(function(results){
-        Nastavnik.findOrCreate({ where: { NastavniciId: i+1 }, defaults: { username: nas[i].nastavnik.username, password_hash: nas[i].nastavnik.password_hash, NastavniciId: i+1 } })
-        .then(function(results){
+        Nastavnik.findOrCreate({ where: { NastavniciId: results[0].dataValues.id }, defaults: { username: nas[i].nastavnik.username, password_hash: nas[i].nastavnik.password_hash, NastavniciId: results[0].dataValues.id } })
+        .then(function(results1){
                   for(var j=0;j<nas[i].predmeti.length;j++)
-          Predmet.findOrCreate({ where: { NastavniciId: i+1, naziv:nas[i].predmeti[j] }, defaults: { naziv: nas[i].predmeti[j], NastavniciId: i+1 } })
+          Predmet.findOrCreate({ where: { NastavniciId: results[0].dataValues.id, naziv:nas[i].predmeti[j] }, defaults: { naziv: nas[i].predmeti[j], NastavniciId: results[0].dataValues.id} })
         })}
       )
   });
@@ -73,14 +73,19 @@ var nizPromisea = [];
  var pri=require("./public/data/prisustva.json")
  console.log(nas.length)
  function asinhronoUnos2(i,pri) {
+  console.log("\ni!=",i,"\n")
   return new Promise(function (resolve, reject) {
-      Prisustva.findOrCreate({ where: {predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno }, default:{ predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno} }).then(function(results){
+      Prisustva.findOrCreate({ where: {predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno }, default:{ predmet:pri[i].predmet, brojPredavanjaSedmicno:pri[i].brojPredavanjaSedmicno, brojVjezbiSedmicno:pri[i].brojVjezbiSedmicno} })
+      .then(function(results){
         for(var p=0;p<pri[i].studenti.length;p++)
-        Student.findOrCreate({ where: { PrisustvaId: i+1,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index }, defaults: {  PrisustvaId: i+1,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index} })
-        .then(function(results){
+        {
+          Student.findOrCreate({ where: { PrisustvaId: results[0].dataValues.id,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index }, defaults: {  PrisustvaId: results[0].dataValues.id,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index} })
+        .then(function(results1){
                   for(var j=0;j<pri[i].prisustva.length;j++)
-          Prisustvo.findOrCreate({ where: { PrisustvaId: i+1, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja }, defaults: {  PrisustvaId: i+1, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja} })
-        })}
+          Prisustvo.findOrCreate({ where: { PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja }, defaults: {  PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja} })
+        })
+        }
+        }
       )
   });
 }
@@ -141,11 +146,73 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
     var tzu1=req.params.index;
     console.log(req.body['sedmica']);
       if(req.session.username!=null)
-      fs.readFile(__dirname+"/public/data/prisustva.json", (err, data) => {
-        if (err==null) 
+     {
+      Prisustva.findAll({include : [Prisustvo, Student]}).then(function(results){
+        var rez=[]
+        var qwe=-1
+        var qwe1=0
+        console.log(results[0].Prisustvos[0])
+        for(var i=0;i<results.length;i++)
         {
-            let unpa= JSON.parse(data);
-            let z=0;
+          var k={
+            predmet:"",
+            brojPredavanjaSedmicno:0,
+            brojVjezbiSedmicno:0
+          ,prisustva:[],
+        studenti:[]
+      }
+          k.predmet=results[i].dataValues.predmet;
+          k.brojPredavanjaSedmicno=results[i].dataValues.brojPredavanjaSedmicno;
+          k.brojVjezbiSedmicno=results[i].dataValues.brojVjezbiSedmicno;
+          for(var j=0;j<results[i].dataValues.Students.length;j++)
+          {
+            var z={
+              ime: "",
+                index: 0
+               }
+               z.ime=results[i].dataValues.Students[j].ime;
+               z.index=results[i].dataValues.Students[j].index;
+              k.studenti.push(z)
+          }
+          for(var j=0;j<results[i].dataValues.Prisustvos.length;j++)
+          {
+            var z={
+              sedmica: 0,
+                predavanja: 0,
+                vjezbe: 0,
+                index: 0
+            }
+            z.sedmica=results[i].dataValues.Prisustvos[j].sedmica;
+            z.index=results[i].dataValues.Prisustvos[j].index;
+            z.predavanja=results[i].dataValues.Prisustvos[j].predavanja;
+            z.vjezbe=results[i].dataValues.Prisustvos[j].vjezbe;
+              k.prisustva.push(z)
+              if(results[i].dataValues.predmet==tzu)
+              {
+                qwe1=i;
+              }
+              if(qwe==-1&&results[i].dataValues.predmet==tzu&&results[i].dataValues.Prisustvos[j].dataValues.sedmica==req.body['sedmica']&&results[i].dataValues.Prisustvos[j].dataValues.index==tzu1)
+              {
+                  qwe=1;
+                  results[i].dataValues.Prisustvos[j].dataValues.predavanja=req.body['predavanja'];
+                  results[i].dataValues.Prisustvos[j].dataValues.vjezbe=req.body['vjezbe'];
+                            //update baza
+                            console.log("updateeeee",results[i].dataValues.Prisustvos[j].dataValues)
+                            Prisustvo.update(results[i].dataValues.Prisustvos[j].dataValues,{where:{sedmica:req.body['sedmica'],index:tzu1,PrisustvaId:results[i].dataValues.Prisustvos[j].dataValues.PrisustvaId}}).then(function(rkl){console.log("\n!!!!!!!!!!!!!!!!!!!\n",rkl,"\n******************\n")});  
+                            //baza
+              }
+          }
+          rez.push(k)
+        }
+        if(qwe==-1)
+        {
+          //treba kreirati novi zapis
+          console.log("noviiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+          Prisustvo.create({sedmica:req.body['sedmica'],index:tzu1,PrisustvaId:results[qwe1].dataValues.id,predavanja:req.body['predavanja'],vjezbe:req.body['vjezbe']}).then(function(rkl){});
+        }
+        console.log("-------------------------\n")
+        console.log(rez[0].prisustva[0])
+            let unpa= rez
             for(let i=0;i<unpa.length;i++)
             {
                 if(unpa[i].predmet==tzu)
@@ -161,40 +228,23 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
                             console.log("writeam file")
                             unpa[i].prisustva[j].predavanja=req.body['predavanja'];
                             unpa[i].prisustva[j].vjezbe=req.body['vjezbe'];
-                            fs.writeFile(__dirname+"/public/data/prisustva.json",JSON.stringify(unpa),err => {
-                                if (err) {
-                                        console.log("greak")
-                                  console.error(err);
-                                }
-                                console.log("radi")
                             res.json(unpa[i]);
-                              });
-                            break;
                         }
                     }
                     if(zgh==0)
                     {
                         unpa[i].prisustva.push({sedmica:req.body['sedmica'],predavanja:req.body['predavanja'],vjezbe:req.body['vjezbe'],index:tzu1});
-                        fs.writeFile(__dirname+"/public/data/prisustva.json",JSON.stringify(unpa),err => {
-                            if (err) {
-                                    console.log("greak")
-                              console.error(err);
-                            }
-                            // file written successfully
-                            
-                            console.log("radi")
                         res.json(unpa[i]);
-                          });
                     }
 
                     break;
                 }
                 
             }
+          })
         }
-        });
-      else
-      res.json({greska:"Nastavnik nije loginovan"}); 
+     else
+    res.json({greska:"Nastavnik nije loginovan"}); 
       
   });
   app.get('/predmet/:NAZIV',(req,res)=>{
@@ -202,8 +252,7 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
     var tzu=req.params.NAZIV;
       if(req.session.username!=null)
       Prisustva.findAll({include : [Prisustvo, Student]}).then(function(results){
-        console.log("goriidisfs")
-        console.log(results)
+      
         var rez=[]
         for(var i=0;i<results.length;i++)
         {
@@ -243,8 +292,6 @@ app.post('/prisustvo/predmet/:NAZIV/student/:index',(req,res)=>{
           }
           rez.push(k)
         }
-        console.log("-------------------------\n")
-        console.log(rez[0].prisustva[0])
         for(let i=0;i<rez.length;i++)
         {
             if(rez[i].predmet==tzu)

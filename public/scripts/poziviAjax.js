@@ -54,8 +54,8 @@ const PoziviAjax = (()=>{
         ajax.onreadystatechange = function() {
             if (ajax.readyState == 4 && ajax.status == 200){
                 var jsonRez = JSON.parse(ajax.responseText);
-                fnCallback(jsonRez);
                 console.log("uspjeh")
+                fnCallback(jsonRez);
             }
             else if (ajax.readyState == 4)
                {
