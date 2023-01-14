@@ -82,7 +82,7 @@ var nizPromisea = [];
           Student.findOrCreate({ where: { PrisustvaId: results[0].dataValues.id,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index }, defaults: {  PrisustvaId: results[0].dataValues.id,ime:pri[i].studenti[p].ime,index:pri[i].studenti[p].index} })
         .then(function(results1){
                   for(var j=0;j<pri[i].prisustva.length;j++)
-          Prisustvo.findOrCreate({ where: { PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja }, defaults: {  PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja} })
+          Prisustvo.findOrCreate({ where: { PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index}, defaults: {  PrisustvaId: results[0].dataValues.id, sedmica:pri[i].prisustva[j].sedmica,index:pri[i].prisustva[j].index,vjezbe:pri[i].prisustva[j].vjezbe,predavanja:pri[i].prisustva[j].predavanja} })
         })
         }
         }
